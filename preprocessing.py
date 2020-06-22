@@ -1,35 +1,61 @@
-def preprocess_image(image, label, is_training):
+from torchvision import transforms
+import math
+
+def preprocess_image(target_height, target_width, min_scale, max_scale):
+    # image and label are PIL Image.
     # image.shape = (height, width, channel)
     # label.shape = (1, height, width) 
-     
 
-    return image, label
+    # shape = image.size
+    # h = shape[0] 
+    # w = shape[1]
+    # c = 1
+    # if len(shape) == 3:
+    #     c = shape[2]
+    # scale = (max_scale - min_scale) * torch.rand(1) + min_scale
 
-def random_rescale_image_and_label(image, label, min_scale, max_scale):
-
-    if min_scale <= 0:
-      raise ValueError('\'min_scale\' must be greater than 0.')
-    elif max_scale <= 0:
-      raise ValueError('\'max_scale\' must be greater than 0.')
-    elif min_scale >= max_scale:
-      raise ValueError('\'max_scale\' must be greater than \'min_scale\'.')
-
-    c, h, w = image.shape
-
-    scale = (max_scale - min_scale) * torch.rand(1) + min_scale
-    new_height = h * scale
-    new_width = w * scale
-
-    image = 
+    # v_pad = math.ceil(max(target_height, h) // 2)
+    # h_pad = math.ceil(max(target_width, w) // 2)
     
-    
-    return image, label
+    composing = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.RandomAffine(0, None, (min_scale, max_scale)), 
+            transforms.RandomCrop((target_height, target_width), 
+                pad_if_needed=True), 
+            transforms.RandomHorizontalFlip(p=0.5),
+            # transforms.ToTensor()
+            ])
 
-def random_crop_or_pad_image_and_label(image, label, crop_height, crop_width, ignore_label):
+    return composing
 
-    return image, label
 
-def random_flip_left_right_image_and_label(image, label):
+def preprocess_empty(target_height, target_width, min_scale, max_scale):
+    composing = transforms.Compose([
+            ])
+    return composing
 
-    return image, label
+def preprocess_PIL(target_height, target_width, min_scale, max_scale):
+    composing = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.RandomCrop((target_height, target_width), 
+                pad_if_needed=True), 
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.ToTensor(),
+            ])
+    return composing
+
+def preprocess_tensor(target_height, target_width, min_scale, max_scale):
+    composing = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.ToTensor(),
+            ])
+    return composing
+
+def preprocess_resize(target_height, target_width, min_scale, max_scale):
+    composing = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((target_height, target_width)), 
+            transforms.ToTensor(),
+            ])
+    return composing
 

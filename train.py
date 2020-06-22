@@ -8,10 +8,19 @@ import yaml
 from tqdm import tqdm
 
 from model import get_model
-from angio import ANGIODataset
+from angio4 import ANGIODataset
 from trainer import Trainer
+from preprocessing import preprocess_image, preprocess_PIL
 
 from torchsummary import summary
+
+# target image size
+_HEIGHT = 512
+_WIDTH = 512
+
+# scale factor
+_MIN_SCALE = 0.5
+_MAX_SCALE = 2.0
 
 def get_parameters(model, bias=None):
     for name, param in model.named_parameters():
@@ -25,6 +34,10 @@ def get_parameters(model, bias=None):
                 yield param
         else:
             raise ValueError('Unexpected module: %s' % str(m))
+
+def collate_fn(batch):
+    batch = list(filter(lambda x: x is not None, batch))
+    return torch.utils.data.dataloader.default_collate(batch)
 
 def main():
 
@@ -46,6 +59,10 @@ def main():
     parser.add_argument(
         '--momentum', type=float, default=0.99, help='momentum',
     )
+    parser.add_argument(
+        '--trainset-index', type=int, default=0, help='trainsubset index : [88, 44, 22, 11]',
+    )
+
     args = parser.parse_args()
 
     args.model = 'FCN'
@@ -72,11 +89,11 @@ def main():
     # DATASET LOADER
     kwargs = {'num_workers': 4, 'pin_memory': True} if cuda else {}
     
-    train_angio_dataset = ANGIODataset('train', transform=None, logdir=args.out)
-    valid_angio_dataset = ANGIODataset('valid', transform=None, logdir=args.out)
+    train_angio_dataset = ANGIODataset('train', index=args.trainset_index, logdir=args.out)
+    valid_angio_dataset = ANGIODataset('valid', logdir=args.out)
 
     train_loader = torch.utils.data.DataLoader(train_angio_dataset,
-                                                batch_size=1, shuffle=True, **kwargs)
+                                                batch_size=3, shuffle=True, collate_fn=collate_fn, **kwargs)
     valid_loader = torch.utils.data.DataLoader(valid_angio_dataset,
                                                 batch_size=1, shuffle=True, **kwargs)
 
@@ -117,7 +134,7 @@ def main():
         model=model,
         optimizer=optim,
         train_loader=train_loader,
-        val_loader=valid_loader, # no val_loader defined
+        val_loader=valid_loader, 
         out=args.out,
         max_iter=args.max_iteration,
         interval_validate=4000,

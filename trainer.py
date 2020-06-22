@@ -21,10 +21,10 @@ import sys
 fp = open('temp.txt', 'w')
 
 def cross_entropy2d(input, target, weight=None, size_average=True):
-    # input: (n, c, h, w), target: (n, h, w)
+    # input: (n, 2, h, w), target: (n, 1, h, w)
     n, c, h, w = input.size()
-    _, th, tw = target.size()
-    # log_p: (n, c, h, w)
+    _, _, th, tw = target.size()
+    # log_p: (n, 2, h, w)
     if LooseVersion(torch.__version__) < LooseVersion('0.3'):
         # ==0.2.X
         log_p = F.log_softmax(input)
@@ -117,6 +117,8 @@ class Trainer(object):
 
             score = score['out']
             target = target.long()
+            # import pdb; pdb.set_trace()
+
             loss = cross_entropy2d(score, target,
                                    size_average=self.size_average)
             loss_data = loss.data.item()
@@ -124,12 +126,14 @@ class Trainer(object):
                 raise ValueError('loss is nan while validating')
             val_loss += loss_data / len(data)
 
-            imgs = data.data.cpu()
+            imgs = data.data.cpu().numpy()
             lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :]
             lbl_true = target.data.cpu().numpy()
             for img, lt, lp in zip(imgs, lbl_true, lbl_pred):
                 # if self.val_loader.dataset.untransform:
                 #     img, lt = self.val_loader.dataset.untransform(img, lt)
+                lt = lt[0]
+                img = np.moveaxis(img, 0, -1)
                 label_trues.append(lt)
                 label_preds.append(lp)
                 if len(visualizations) < 9:
@@ -188,8 +192,6 @@ class Trainer(object):
                 continue  # for resuming
             self.iteration = iteration
 
-            import pdb; pdb.set_trace()
-
             if self.iteration % self.interval_validate == 0:
                 self.validate()
 
@@ -202,12 +204,14 @@ class Trainer(object):
             score = self.model(data)
 
             score = score['out']
+            
             target = target.long()
             if not data.shape[-2:] == target.shape[-2:]:
                 print(batch_idx, filename, file=fp)
                 print(data.shape, score.shape, target.shape, file=fp)
                 continue
 
+            # import pdb; pdb.set_trace()
             loss = cross_entropy2d(score, target,
                                    size_average=self.size_average)
             loss /= len(data)
@@ -243,6 +247,11 @@ class Trainer(object):
         for epoch in tqdm.trange(self.epoch, max_epoch,
                                  desc='Train', ncols=80):
             self.epoch = epoch
-            self.train_epoch()
-            if self.iteration >= self.max_iter:
-                break
+            try:
+                self.train_epoch()
+                if self.iteration >= self.max_iter:
+                    break
+            except Exception as err:
+                with open('error.log', 'w') as fp:
+                    fp.write(err)
+

@@ -1,0 +1,16 @@
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b538.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b538.png
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b600.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b600.png
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b600.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b600.png
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b552.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b552.png 2020-06-04 19:54:39.728767
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b565.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b565.png 2020-06-04 20:54:34.115366
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b598.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b598.png 2020-06-05 03:04:00.993843
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b564.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b564.png 2020-06-05 03:04:54.682520
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b599.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b599.png 2020-06-05 06:55:27.463075
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b554.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b554.png 2020-06-05 16:18:28.312319
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b543.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b543.png 2020-06-05 18:45:54.339934
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b587.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b587.png 2020-06-06 10:04:31.119060
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b552.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b552.png 2020-06-06 16:40:25.037741
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b565.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b565.png 2020-06-06 19:38:16.669550
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b598.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b598.png 2020-06-07 13:09:00.534671
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b564.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b564.png 2020-06-07 13:11:37.139099
+../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/jpegs/ykj_b599.jpg ../tensorflow-deeplab-v3/dataset/boramae/transformed_dir/200211_ykj/transformed/ykj_b599.png 2020-06-08 00:03:04.665857
