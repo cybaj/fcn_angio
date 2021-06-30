@@ -16,7 +16,7 @@ seed(100)
 
 
 class ANGIODataset(data.Dataset):
-    def __init__(self, mode='train', index=0, transform = None, logdir = None, infer_target_dir = None):
+    def __init__(self, mode='train', index=0, transform = None, logdir = None):
         from dataset import metadata, hrhcase_metadata, get_dataset, get_testset, get_trainsubset
 
         targets = metadata.values()
@@ -29,56 +29,41 @@ class ANGIODataset(data.Dataset):
             self.trainset = get_trainsubset(index=index)
         elif mode == 'valid':
             self.trainset = get_testset()
-        elif mode == 'infer':
-            self.trainset = get_testset()
     
         self.total_input_path = []
         self.total_label_path = []
         self.class_names = ["NO", "EA"]
         
+
+        if logdir and not os.path.exists(os.path.join(logdir, 'filelist')):
+            os.mkdir(os.path.join(logdir, 'filelist'))
+
         _input_dir = 'jpegs'
         _label_dir = 'transformed'
-
-        if not mode == 'infer':
-            if logdir and not os.path.exists(os.path.join(logdir, 'filelist')):
-                os.mkdir(os.path.join(logdir, 'filelist'))
-    
-            for target in tqdm(self.trainset):
-                name = target['dirname']
-                target_root = os.path.join(self.data_root, name)
-                input_path = os.path.join(target_root, _input_dir)
-                label_path = os.path.join(target_root, _label_dir)
-                file_name = []
-                with open(os.path.join(target_root, f'{name}_filelist.txt')) as fp:
-                    file_name = fp.readlines()
-                    if mode == 'valid':
-                        length = len(file_name)
-                        if not _DIV == 1 and length >= _DIV:
-                            file_name = sample(file_name, length // _DIV)
-                    if logdir:
-                        with open(os.path.join(logdir, 'filelist', f'{name}_filelist.txt'), 'w') as _fp:
-                            for item in file_name:
-                                _fp.write(item + '\n')
-                    for item in file_name:
-                        self.total_input_path.append(os.path.join(input_path, f'{item[:-1]}.jpg'))
-                        self.total_label_path.append(os.path.join(label_path, f'{item[:-1]}.png'))
-
-        elif mode == 'infer':
-            gt_names = os.listdir(os.path.join(infer_target_dir, 'transformed'))
-            img_names = os.listdir(os.path.join(infer_target_dir, 'jpegs'))
-
-            gt_names.sort()
-            img_names.sort()
-
-            for gt, img in zip(gt_names, img_names):
-                self.total_input_path.append(os.path.join(infer_target_dir, 'jpegs', img))
-                self.total_label_path.append(os.path.join(infer_target_dir, 'transformed', gt))
-
+        for target in tqdm(self.trainset):
+            name = target['dirname']
+            target_root = os.path.join(self.data_root, name)
+            input_path = os.path.join(target_root, _input_dir)
+            label_path = os.path.join(target_root, _label_dir)
+            file_name = []
+            with open(os.path.join(target_root, f'{name}_filelist.txt')) as fp:
+                file_name = fp.readlines()
+                if mode == 'valid':
+                    length = len(file_name)
+                    if not _DIV == 1 and length >= _DIV:
+                        file_name = sample(file_name, length // _DIV)
+                if logdir:
+                    with open(os.path.join(logdir, 'filelist', f'{name}_filelist.txt'), 'w') as _fp:
+                        for item in file_name:
+                            _fp.write(item + '\n')
+                for item in file_name:
+                    self.total_input_path.append(os.path.join(input_path, f'{item[:-1]}.jpg'))
+                    self.total_label_path.append(os.path.join(label_path, f'{item[:-1]}.png'))
         self.mode = mode
         self.transform = transform
 
         # self.default_transform = preprocess_tensor(512,512,2,3)
-        self.default_transform = preprocess_resize(512,512,2,3)
+        self.default_transform = preprocess_resize(224,224,2,3)
 
     # need to define __len__
     def __len__(self):
@@ -124,4 +109,3 @@ class ANGIODataset(data.Dataset):
             return input_img, label_img, (self.total_input_path[idx].split('/')[-1], self.total_label_path[idx].split('/')[-1])
         else :
             return input_img, label_img, (self.total_input_path[idx].split('/')[-1], self.total_label_path[idx].split('/')[-1])
-

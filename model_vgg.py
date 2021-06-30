@@ -2,6 +2,10 @@ import torch
 import torchvision.models as models
 import torch.nn as nn
 from collections import OrderedDict
+from visdom import Visdom
+import pdb
+
+viz = Visdom(server='http://0.0.0.0', port=6006)
 
 def hook_fn(module, input, output):
     # print('hooked')
@@ -10,6 +14,54 @@ def hook_fn(module, input, output):
     # print(f'{module} input : {input[0].shape}')
     # print(f'{module} output : {output["out"].shape}')
     pass
+
+def hook_base_fn(module, input, output):
+    print(f'input : {input[0].shape}')
+    print(f'output : {output[0].shape}')
+    viz.image(input[0].cpu().numpy()[0], opts=dict(
+        title='input image'
+        ))
+
+def hook_pool4_fn(module, input, output):
+    print(f'input : {input[0].shape}')
+    print(f'output : {output[0].shape}')
+    viz.image(output[0].cpu().numpy()[0], opts=dict(
+        title='pool4 output 0 channel'
+        ))
+    viz.image(output[0].cpu().numpy()[1], opts=dict(
+        title='pool4 output 1 channel'
+        ))
+
+def hook_pool5_fn(module, input, output):
+    print(f'input : {input[0].shape}')
+    print(f'output : {output[0].shape}')
+    viz.image(output[0].cpu().numpy()[0], opts=dict(
+        title='pool5 output 0 channel'
+        ))
+    viz.image(output[0].cpu().numpy()[1], opts=dict(
+        title='pool5 output 1 channel'
+        ))
+
+
+def hook_feature_fn(module, input, output):
+    print(f'input : {input[0].shape}')
+    print(f'output : {output[0].shape}')
+    viz.image(input[0].cpu().numpy()[0][0], opts=dict(
+        title='input 0 channel'
+        ))
+    viz.image(input[0].cpu().numpy()[0][1], opts=dict(
+        title='input 1 channel'
+        ))
+    viz.image(output[0].cpu().numpy()[0], opts=dict(
+        title='output 0 channel'
+        ))
+    viz.image(output[0].cpu().numpy()[1], opts=dict(
+        title='output 1 channel'
+        ))
+    pdb.set_trace()
+     
+    pass
+
 
 def hook_vision_fn(module, input, output):
     # print('hooked')
@@ -77,44 +129,54 @@ class FCN16(nn.Module):
     # )
 
     self.classifier = nn.Sequential(OrderedDict([
-        ('conv1', nn.Conv2d(512, 4096, 7)), # fc6
+        ('conv1', nn.Conv2d(512, 4096, 1)), # fc6
+        # ('bn1', nn.BatchNorm2d(4096)),
         ('relu1', nn.ReLU(inplace=True)),
         ('conv2', nn.Conv2d(4096, 4096, 1)), # fc7
+        # ('bn2', nn.BatchNorm2d(4096)),
         ('relu2', nn.ReLU(inplace=True)),
-        ('conv3', nn.Conv2d(4096, 2, 1)) # score_fr
+        ('conv3', nn.Conv2d(4096, 2, 1)), # score_fr
+        ('bn2', nn.BatchNorm2d(2))
       ])
     )
     self.score_pool4 = nn.Conv2d(512, 2, 1)
-    self.upscore2 = nn.ConvTranspose2d(2, 2, 14, stride=2, bias=False) # upscore2
+    self.upscore2 = nn.ConvTranspose2d(2, 2, 2, stride=2, bias=False) # upscore2
     self.upscore16 = nn.ConvTranspose2d(2, 2, 16, stride=16, bias=False)
+    self.upscore16.weight = nn.parameter.Parameter(torch.stack((torch.full((2,16,16), 0.), torch.full((2,16,16), 1.)), dim=1))
+    # self.upscore16.weight = nn.parameter.Parameter(torch.full((1,2,16,16), 1.))
 
     self.features_1 = self.features[:-7]
     self.features_2 = self.features[-7:]
 
-    self.conv_1 = nn.Conv2d(512,512,3)
-    self.conv_1 = nn.Conv2d(512,512,3)
+    self.bn_pool4 = nn.BatchNorm2d(2)
+    self.sigmoid = nn.Sigmoid()
 
   def forward(self, x):
     pool4 = self.features_1(x)
     pool5 = self.features_2(pool4)
     pool5_upscored = self.upscore2(self.classifier(pool5))
     pool4_scored = self.score_pool4(pool4)
+    pool4_scored = self.bn_pool4(pool4_scored)
     combined = pool4_scored + pool5_upscored
     res = self.upscore16(combined)
+    res = self.sigmoid(res)
     return res
 
 def get_vgg():
     model = FCN16()
     model.train()
-    model.register_forward_hook(hook_fn)
+    print(model)
+    # model.register_forward_hook(hook_fn)
     # model.classifier.conv1.register_forward_hook(hook_fn)
     # model.classifier.conv2.register_forward_hook(hook_fn)
     # model.classifier.conv3.register_forward_hook(hook_fn)
     # model.score_pool4.register_forward_hook(hook_fn)
-    # model.upscore2.register_forward_hook(hook_fn)
-    # model.features_1.register_forward_hook(hook_fn)
     # model.features_2.register_forward_hook(hook_fn)
     # model.classifier.relu1.register_forward_hook(hook_fn)
-    # model.upscore16.register_forward_hook(hook_fn)
+
+    # model.upscore2.register_forward_hook(hook_pool5_fn)
+    # model.features_1.register_forward_hook(hook_base_fn)
+    # model.score_pool4.register_forward_hook(hook_pool4_fn)
+    # model.upscore16.register_forward_hook(hook_feature_fn)
     return model
 
